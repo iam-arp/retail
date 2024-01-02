@@ -49,7 +49,7 @@ def generate_pdf(data):
 def main():
     global transaction_counter  # Keep track of the transaction ID
 
-    st.title("Retail Billing System")
+    st.title("sky: Billing system")
 
     # Input fields
     name_or_id = st.text_input("Enter Name or Customer ID:")
@@ -57,7 +57,7 @@ def main():
     quantity = st.number_input("Enter Quantity:", min_value=1, step=1)
 
     # Display selected SKU and its price
-    st.info(f"Selected SKU: {sku}, Price: ${sku_price_dict[sku]:.2f}")
+    st.info(f"Selected SKU: {sku}, Price: ₹{sku_price_dict[sku]:.2f}")
 
     # Add to bill_data on button click
     if st.button("Add to Bill"):
