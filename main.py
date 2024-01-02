@@ -108,36 +108,54 @@ class RetailBillingSystem:
         cls.transaction_counter += 1
         return transaction_id
 
-    def add_to_bill(self, name_or_id, sku, quantity):
-        now = datetime.now()
-        date = now.strftime("%Y-%m-%d")
-        time = now.strftime("%H:%M:%S")
-    
-        transaction_id = self.generate_transaction_id()
-    
-        self.bill_data['Transaction ID'].append(transaction_id)
-        self.bill_data['Name'].append(name_or_id)
-        self.bill_data['Customer ID'].append(name_or_id)
-        self.bill_data['Date'].append(date)
-        self.bill_data['Time'].append(time)
-        self.bill_data['SKU'].append(sku)
-        self.bill_data['Quantity'].append(quantity)
-        price = self.sku_price_dict[sku] * quantity
-        self.bill_data['Price'].append(price)
-    
-        SalesDatabase.save_to_database(self.sales_db.db_path, transaction_id, name_or_id, name_or_id, date, time, sku,
-                                       quantity, price)
-    
-        self.display_message(f"Item added to the bill for {name_or_id}", message_type="success")
-        logging.info(
-            f"Item added to the bill. Transaction ID: {transaction_id}, SKU: {sku}, Quantity: {quantity}, Price: {price}")
-    
-        # Display the live update of the current item added to the bill
-        live_update_placeholder = st.empty()
-        live_update_placeholder.info(f"Added to Bill: SKU: {sku}, Quantity: {quantity}, Price: {price}")
-    
-        # After adding an item, update the display of the current bill
-        self.display_current_bill()
+# Inside the RetailBillingSystem class
+def add_to_bill(self, name_or_id, sku, quantity):
+    now = datetime.now()
+    date = now.strftime("%Y-%m-%d")
+    time = now.strftime("%H:%M:%S")
+
+    transaction_id = self.generate_transaction_id()
+
+    self.bill_data['Transaction ID'].append(transaction_id)
+    self.bill_data['Name'].append(name_or_id)
+    self.bill_data['Customer ID'].append(name_or_id)
+    self.bill_data['Date'].append(date)
+    self.bill_data['Time'].append(time)
+    self.bill_data['SKU'].append(sku)
+    self.bill_data['Quantity'].append(quantity)
+    price = self.sku_price_dict[sku] * quantity
+    self.bill_data['Price'].append(price)
+
+    SalesDatabase.save_to_database(self.sales_db.db_path, transaction_id, name_or_id, name_or_id, date, time, sku,
+                                   quantity, price)
+
+    self.display_message(f"Item added to the bill for {name_or_id}", message_type="success")
+    logging.info(
+        f"Item added to the bill. Transaction ID: {transaction_id}, SKU: {sku}, Quantity: {quantity}, Price: {price}")
+
+    # After adding an item, update the display of the current bill
+    self.display_current_bill()
+
+def generate_bill(self):
+    if not self.bill_data['Transaction ID']:
+        st.warning("No data available to generate the bill. Add items to the bill first.")
+        return
+
+    st.title("Generated Bill")
+    st.table(pd.DataFrame(self.bill_data))
+
+    # Call the PDF generation method here if needed
+    # self.invoice_generator.generate_pdf(self.bill_data)
+
+    # Optionally, you can reset the bill_data after generating the bill
+    self.reset_bill_data()
+
+def reset_bill_data(self):
+    # Reset the bill_data for a new transaction
+    self.bill_data = {'Transaction ID': [], 'Name': [], 'Customer ID': [], 'Date': [], 'Time': [], 'SKU': [],
+                      'Quantity': [], 'Price': []}
+    st.success("Bill data reset for a new transaction.")
+
 
     def display_current_bill(self):
         if not self.bill_data['Transaction ID']:
@@ -199,7 +217,7 @@ def main():
 
     st.title("Retail Billing System")
 
-    st.sidebar.title("Navigation")
+    st.sidebar.title("GD Vishal Grocery")
     selected_option = st.sidebar.radio("Select an option",
                                        ["Add to Bill", "View Current Bill", "Save Data to CSV", "Generate PDF",
                                         "Download All Sales Records CSV"])
@@ -210,11 +228,14 @@ def main():
         sku = st.selectbox("Select SKU:", retail_system.skus)
         quantity = st.number_input("Enter Quantity:", min_value=1, step=1)
 
-        st.info(f"Selected SKU: {sku}, Price: ${retail_system.sku_price_dict[sku]:.2f}")
+        st.info(f"Selected SKU: {sku}, Price: ₹{retail_system.sku_price_dict[sku]:.2f}")
 
         if st.button("Add to Bill"):
             retail_system.add_to_bill(name_or_id, sku, quantity)
 
+    elif selected_option == "Generate Bill":
+        retail_system.generate_bill()
+    
     elif selected_option == "View Current Bill":
         retail_system.display_current_bill()
 
