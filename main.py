@@ -1,10 +1,18 @@
-subprocess.run(["pip", "install", "-r", "requirements.txt"])
+
 
 import streamlit as st
 import pandas as pd
 from fpdf import FPDF
 from datetime import datetime
 import random
+
+try:
+    # Try importing the required libraries
+    import streamlit, pandas, fpdf
+except ImportError:
+    # If an ImportError occurs, install dependencies
+    import subprocess
+    subprocess.run(["pip", "install", "-r", "requirements.txt"])
 
 # Generate SKUs and random prices
 skus = [f"sku_{i}" for i in range(1, 21)]
