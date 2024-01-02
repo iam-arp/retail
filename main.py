@@ -108,29 +108,36 @@ class RetailBillingSystem:
         cls.transaction_counter += 1
         return transaction_id
 
-    def add_to_bill(self, name_or_id, sku, quantity):
-        now = datetime.now()
-        date = now.strftime("%Y-%m-%d")
-        time = now.strftime("%H:%M:%S")
+def add_to_bill(self, name_or_id, sku, quantity):
+    now = datetime.now()
+    date = now.strftime("%Y-%m-%d")
+    time = now.strftime("%H:%M:%S")
 
-        transaction_id = self.generate_transaction_id()
+    transaction_id = self.generate_transaction_id()
 
-        self.bill_data['Transaction ID'].append(transaction_id)
-        self.bill_data['Name'].append(name_or_id)
-        self.bill_data['Customer ID'].append(name_or_id)
-        self.bill_data['Date'].append(date)
-        self.bill_data['Time'].append(time)
-        self.bill_data['SKU'].append(sku)
-        self.bill_data['Quantity'].append(quantity)
-        price = self.sku_price_dict[sku] * quantity
-        self.bill_data['Price'].append(price)
+    self.bill_data['Transaction ID'].append(transaction_id)
+    self.bill_data['Name'].append(name_or_id)
+    self.bill_data['Customer ID'].append(name_or_id)
+    self.bill_data['Date'].append(date)
+    self.bill_data['Time'].append(time)
+    self.bill_data['SKU'].append(sku)
+    self.bill_data['Quantity'].append(quantity)
+    price = self.sku_price_dict[sku] * quantity
+    self.bill_data['Price'].append(price)
 
-        SalesDatabase.save_to_database(self.sales_db.db_path, transaction_id, name_or_id, name_or_id, date, time, sku,
-                                       quantity, price)
+    SalesDatabase.save_to_database(self.sales_db.db_path, transaction_id, name_or_id, name_or_id, date, time, sku,
+                                   quantity, price)
 
-        self.display_message(f"Item added to the bill for {name_or_id}", message_type="success")
-        logging.info(
-            f"Item added to the bill. Transaction ID: {transaction_id}, SKU: {sku}, Quantity: {quantity}, Price: {price}")
+    self.display_message(f"Item added to the bill for {name_or_id}", message_type="success")
+    logging.info(
+        f"Item added to the bill. Transaction ID: {transaction_id}, SKU: {sku}, Quantity: {quantity}, Price: {price}")
+
+    # Display the live update of the current item added to the bill
+    live_update_placeholder = st.empty()
+    live_update_placeholder.info(f"Added to Bill: SKU: {sku}, Quantity: {quantity}, Price: {price}")
+
+    # After adding an item, update the display of the current bill
+    self.display_current_bill()
 
     def display_current_bill(self):
         if not self.bill_data['Transaction ID']:
